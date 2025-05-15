@@ -1,0 +1,13 @@
+Flask==2.3.2
+Flask-Login==0.6.2
+SQLAlchemy==1.4.49
+Werkzeug==2.3.4
+pillow==9.5.0
+opencv-python==4.8.1.78
+mediapipe==0.10.11
+cvzone==1.5.6
+tensorflow==2.13.0
+jax==0.4.13
+jaxlib==0.4.13
+gtts
+flask-sqlalchemy

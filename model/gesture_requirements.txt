@@ -1,0 +1,8 @@
+tensorflow==2.13.0
+#keras==2.13.1
+numpy==1.24.3
+opencv-python==4.8.1.78
+mediapipe==0.10.11
+cvzone==1.5.6
+jax==0.4.13
+jaxlib==0.4.13

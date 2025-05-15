@@ -1,0 +1,5 @@
+0 goodbye
+1 hello
+2 help
+3 nice
+4 yes
