@@ -35,7 +35,20 @@ class User(Base, UserMixin):
     password = Column(String, nullable=False)
 
 Base.metadata.create_all(bind=engine)
-da = SessionLocal()
+#da = SessionLocal()
+from flask import g
+
+def get_db():
+    if 'db' not in g:
+        g.db = SessionLocal()
+    return g.db
+
+@app.teardown_appcontext
+def teardown_db(exception=None):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
+
 # Login manager
 login_manager = LoginManager()
 login_manager.login_view = 'login'
@@ -43,11 +56,16 @@ login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return da.query(User).get(int(user_id))
+    db = get_db()
+    return db.query(User).get(int(user_id))
+
+#@login_manager.user_loader
+#def load_user(user_id):
+    #return da.query(User).get(int(user_id))
 
 model_path = os.path.join(BASE_DIR, 'model/converted_keras/keras_model.h5')
 labels_path = os.path.join(BASE_DIR, 'model/converted_keras/labels.txt')
-labels_list = ["goodbye","hello","help","nice","yes"] # use keys from translations
+labels_list = ["goodbye","hello","help","nice","yes"] 
 recognizer = GestureRecognizer(model_path, labels_path, labels_list)
 
 # --- Routes ---
@@ -56,15 +74,17 @@ def signup():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        existing_user = da.query(User).filter_by(username=username).first()
+        db = get_db()
+        existing_user = db.query(User).filter_by(username=username).first()
         if existing_user:
             flash('Username already exists.')
             return redirect(url_for('signup'))
 
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
         new_user = User(username=username, password=hashed_password)
-        da.add(new_user)
-        da.commit()
+        db=get_db()
+        db.add(new_user)
+        db.commit()
         flash('Account created successfully! Please log in.')
         return redirect(url_for('login'))
     return render_template('signup.html')
@@ -74,7 +94,10 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        user = da.query(User).filter_by(username=username).first()
+        db = get_db()
+        user = db.query(User).filter_by(username=username).first()
+
+        #user = da.query(User).filter_by(username=username).first()
         if user and check_password_hash(user.password, password):
             login_user(user)
             return redirect(url_for('camera'))
